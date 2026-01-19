@@ -1,0 +1,384 @@
+question,sql_query
+Month-on-month sales for Lysol at Walmart,"WITH walmart_stores AS (
+    SELECT RETAILER_OUTLET_ID
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet
+    WHERE RETAILER_ID ILIKE '%WALMART%'
+        AND UPPER(REGION) NOT IN ('55 - RETAIL REGION 55', '99 - RETAIL REGION 99')
+        AND UPPER(REGION) IS NOT NULL
+),
+monthly_sales AS (
+    SELECT
+        DATE_TRUNC('MONTH', rpc_day.DATE) AS month,
+        SUM(rpc_day.SALES_VALUE) AS total_sales
+    FROM
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+    JOIN
+        trinity_prod_domain_master.master_data_gold.dimension_product mdp
+        ON rpc_day.RECKITT_PRODUCT_CODE = mdp.product_code
+    JOIN walmart_stores ws
+        ON rpc_day.RETAILER_OUTLET_ID = ws.RETAILER_OUTLET_ID
+    WHERE
+        mdp.brand_name ILIKE '%Lysol/Lizol%'
+        AND (
+            (rpc_day.DATE BETWEEN DATE('2025-11-01') AND DATE('2025-11-30'))
+            OR (rpc_day.DATE BETWEEN DATE('2025-12-01') AND DATE('2025-12-31'))
+        )
+        AND mdp.lob <> 'NTR'
+    GROUP BY
+        DATE_TRUNC('MONTH', rpc_day.DATE)
+),
+monthly_growth AS (
+    SELECT
+        DATE_FORMAT(month, 'yyyy-MM') AS month,
+        ROUND(total_sales, 2) AS total_sales,
+        ROUND(LAG(total_sales) OVER (ORDER BY month), 2) AS previous_month_sales,
+        ROUND(
+            (total_sales - LAG(total_sales) OVER (ORDER BY month)) / NULLIF(LAG(total_sales) OVER (ORDER BY month), 0) * 100,
+            2
+        ) AS month_on_month_growth_percentage
+    FROM monthly_sales
+)
+SELECT
+    month,
+    total_sales,
+    previous_month_sales,
+    month_on_month_growth_percentage
+FROM monthly_growth
+WHERE month IN ('2025-11', '2025-12')
+ORDER BY month;"
+Give me YTD 2025 sales for woolite at Walmart compared to YTD 2024,"WITH ytd_dates AS (
+    SELECT
+        DATE('2025-01-01') AS current_year_start,
+        DATE('2025-12-31') AS current_year_end,
+        DATE('2024-01-01') AS previous_year_start,
+        DATE('2024-12-31') AS previous_year_end
+),
+walmart_stores AS (
+    SELECT RETAILER_OUTLET_ID
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet
+    WHERE RETAILER_ID ILIKE '%WALMART%'
+        AND UPPER(region) NOT IN ('55 - RETAIL REGION 55', '99 - RETAIL REGION 99')
+        AND UPPER(region) IS NOT NULL
+),
+ytd_sales AS (
+    SELECT
+        '2025' AS year,
+        SUM(rpc_day.SALES_VALUE) AS total_sales
+    FROM
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+    JOIN walmart_stores ws
+        ON rpc_day.RETAILER_OUTLET_ID = ws.RETAILER_OUTLET_ID
+    JOIN trinity_prod_domain_master.master_data_gold.dimension_product prod
+        ON rpc_day.RECKITT_PRODUCT_CODE = prod.product_code
+    CROSS JOIN ytd_dates
+    WHERE
+        rpc_day.DATE BETWEEN ytd_dates.current_year_start AND ytd_dates.current_year_end
+        AND prod.brand_name ILIKE '%Woolite%'
+        AND prod.lob <> 'NTR'
+    UNION ALL
+    SELECT
+        '2024' AS year,
+        SUM(rpc_day.SALES_VALUE) AS total_sales
+    FROM
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+    JOIN walmart_stores ws
+        ON rpc_day.RETAILER_OUTLET_ID = ws.RETAILER_OUTLET_ID
+    JOIN trinity_prod_domain_master.master_data_gold.dimension_product prod
+        ON rpc_day.RECKITT_PRODUCT_CODE = prod.product_code
+    CROSS JOIN ytd_dates
+    WHERE
+        rpc_day.DATE BETWEEN ytd_dates.previous_year_start AND ytd_dates.previous_year_end
+        AND prod.brand_name ILIKE '%Woolite%'
+        AND prod.lob <> 'NTR'
+)
+SELECT
+    year,
+    ROUND(total_sales, 2) AS total_sales
+FROM ytd_sales
+ORDER BY year;"
+What is the gross margin of Veet for the current quarter 2025 versus the same quarter in 2024?,"WITH 
+Q4_2025_Gross_Margin AS (
+    SELECT
+        ROUND(SUM(Gross_Margin), 2) AS Gross_Margin_Q4_2025
+    FROM trinity_dev_domain_sales.smart_exec_us_gold.smex_cb_full_table_finance
+    WHERE Year_Month BETWEEN '2025-10-01' AND '2025-12-31'
+    AND Brand_Name ILIKE '%Veet%'
+),
+Q4_2024_Gross_Margin AS (
+    SELECT
+        ROUND(SUM(Gross_Margin), 2) AS Gross_Margin_Q4_2024
+    FROM trinity_dev_domain_sales.smart_exec_us_gold.smex_cb_full_table_finance
+    WHERE Year_Month BETWEEN '2024-10-01' AND '2024-12-31'
+    AND Brand_Name ILIKE '%Veet%'
+)
+SELECT 
+    Q4_2025_Gross_Margin.Gross_Margin_Q4_2025,
+    Q4_2024_Gross_Margin.Gross_Margin_Q4_2024,
+    ROUND(Q4_2025_Gross_Margin.Gross_Margin_Q4_2025 - Q4_2024_Gross_Margin.Gross_Margin_Q4_2024, 2) AS Change,
+    CASE 
+        WHEN Q4_2024_Gross_Margin.Gross_Margin_Q4_2024 = 0 THEN 'Cannot be calculated'
+        ELSE ROUND(((Q4_2025_Gross_Margin.Gross_Margin_Q4_2025 - Q4_2024_Gross_Margin.Gross_Margin_Q4_2024) / Q4_2024_Gross_Margin.Gross_Margin_Q4_2024) * 100, 2) || '%' 
+    END AS Growth_Percentage
+FROM 
+    Q4_2025_Gross_Margin, 
+    Q4_2024_Gross_Margin;"
+What was our OOS for Top 5 SKU across Walmart in 2025?,"WITH walmart_stores AS (
+    SELECT RETAILER_OUTLET_ID
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet
+    WHERE RETAILER_ID ILIKE '%WALMART%'
+        AND UPPER(region) NOT IN ('55 - RETAIL REGION 55', '99 - RETAIL REGION 99')
+        AND UPPER(region) IS NOT NULL
+),
+top_skus AS (
+    SELECT 
+        prod.consumer_product_code AS SKU,
+        prod.product_description,
+        SUM(fact.SALES_VALUE) AS total_sales_2025
+    FROM 
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw fact
+    JOIN 
+        trinity_prod_domain_master.master_data_gold.dimension_product prod
+            ON fact.RECKITT_PRODUCT_CODE = prod.product_code
+    JOIN 
+        walmart_stores ws
+            ON fact.RETAILER_OUTLET_ID = ws.RETAILER_OUTLET_ID
+    WHERE 
+        fact.DATE BETWEEN '2025-01-01' AND '2025-12-31'
+        AND prod.lob <> 'NTR'
+    GROUP BY 
+        prod.consumer_product_code, 
+        prod.product_description
+    ORDER BY 
+        total_sales_2025 DESC
+    LIMIT 5
+)
+SELECT
+    top_skus.SKU,
+    top_skus.product_description,
+    ROUND(SUM(daily.agg_complete_oos) / SUM(daily.agg_sales), 3) AS Complete_OOS,
+    ROUND(SUM(daily.agg_phantom_oos) / SUM(daily.agg_sales), 3) AS Phantom_OOS,
+    ROUND((SUM(daily.agg_complete_oos) + SUM(daily.agg_phantom_oos)) / SUM(daily.agg_sales), 3) AS Total_OOS,
+    ROUND(SUM(daily.agg_low_oos) / SUM(daily.agg_sales), 3) AS Low_Stock
+FROM
+    trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_daily_pvm_aj_v3 daily
+JOIN 
+    trinity_prod_domain_master.master_data_gold.dimension_product prod
+        ON daily.RECKITT_PRODUCT_CODE = prod.product_code
+JOIN 
+    top_skus
+        ON prod.consumer_product_code = top_skus.SKU
+JOIN 
+    walmart_stores ws
+        ON daily.RETAILER_OUTLET_ID = ws.RETAILER_OUTLET_ID
+WHERE 
+    daily.DATE BETWEEN '2025-01-01' AND '2025-12-31'
+    AND prod.lob <> 'NTR'
+GROUP BY
+    top_skus.SKU,
+    top_skus.product_description
+ORDER BY
+    Total_OOS DESC;"
+Which brand had the highest sales across all walmart stores in 2024?,"SELECT 
+    mdp.BRAND_NAME,
+    SUM(rpc_day.SALES_VALUE) AS TOTAL_SALES_2024
+FROM 
+    trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+JOIN 
+    trinity_prod_domain_master.master_data_gold.dimension_product mdp
+    ON rpc_day.RECKITT_PRODUCT_CODE = mdp.product_code
+JOIN 
+    trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet do
+    ON rpc_day.RETAILER_OUTLET_ID = do.RETAILER_OUTLET_ID
+WHERE 
+    rpc_day.DATE BETWEEN '2024-01-01' AND '2024-12-31'
+    AND do.RETAILER_ID ILIKE '%WALMART%'
+    AND UPPER(do.region) NOT IN ('55 - RETAIL REGION 55', '99 - RETAIL REGION 99')
+    AND UPPER(do.region) IS NOT NULL
+    AND mdp.lob <> 'NTR'
+GROUP BY 
+    mdp.BRAND_NAME
+ORDER BY 
+    TOTAL_SALES_2024 DESC
+LIMIT 1;
+"
+YOY GS trend for Walmart for 2025,"SELECT
+    '2025' AS Year,
+    ROUND(SUM(CASE WHEN Year_Month >= '2025-01-01' AND Year_Month <= '2025-12-31' THEN Gross_Sales ELSE 0 END), 2) AS Gross_Sales_2025,
+    '2024' AS Comparison_Year,
+    ROUND(SUM(CASE WHEN Year_Month >= '2024-01-01' AND Year_Month <= '2024-12-31' THEN Gross_Sales ELSE 0 END), 2) AS Gross_Sales_2024,
+    ROUND(
+        (SUM(CASE WHEN Year_Month >= '2025-01-01' AND Year_Month <= '2025-12-31' THEN Gross_Sales ELSE 0 END) -
+         SUM(CASE WHEN Year_Month >= '2024-01-01' AND Year_Month <= '2024-12-31' THEN Gross_Sales ELSE 0 END)) /
+         SUM(CASE WHEN Year_Month >= '2024-01-01' AND Year_Month <= '2024-12-31' THEN Gross_Sales ELSE 0 END) * 100, 
+    2) AS YoY_Growth_Percentage
+FROM trinity_dev_domain_sales.smart_exec_us_gold.smex_cb_full_table_finance
+WHERE Retailer_Name ILIKE '%WALMART%';"
+What are today’s sales versus yesterday’s sales for Finish in Kroger also compare it for 2024,"WITH _kroger_stores AS (
+    SELECT
+        RETAILER_OUTLET_ID
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet
+    WHERE RETAILER_ID ILIKE 'KROGER'
+),
+_today_and_yesterday AS (
+    SELECT
+        CURRENT_DATE AS today_date,
+        CURRENT_DATE - INTERVAL '1 day' AS yesterday_date
+),
+_sales_today_yesterday AS (
+    SELECT
+        CASE
+            WHEN rpc_day.DATE = _today_and_yesterday.today_date THEN 'Today'
+            WHEN rpc_day.DATE = _today_and_yesterday.yesterday_date THEN 'Yesterday'
+        END AS period,
+        SUM(rpc_day.SALES_VALUE) AS sales_value
+    FROM
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+    LEFT JOIN trinity_prod_domain_master.master_data_gold.dimension_product mdp
+        ON rpc_day.RECKITT_PRODUCT_CODE = mdp.product_code
+    LEFT JOIN _kroger_stores kroger
+        ON rpc_day.RETAILER_OUTLET_ID = kroger.RETAILER_OUTLET_ID
+    CROSS JOIN _today_and_yesterday
+    WHERE
+        mdp.brand_name ILIKE 'Finish'
+        AND rpc_day.DATE IN (_today_and_yesterday.today_date, _today_and_yesterday.yesterday_date)
+        AND mdp.lob <> 'NTR'
+    GROUP BY
+        period
+),
+_sales_2024 AS (
+    SELECT
+        DATE_TRUNC('month', rpc_day.DATE) AS month,
+        SUM(rpc_day.SALES_VALUE) AS sales_value
+    FROM
+        trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc_day
+    LEFT JOIN trinity_prod_domain_master.master_data_gold.dimension_product mdp
+        ON rpc_day.RECKITT_PRODUCT_CODE = mdp.product_code
+    LEFT JOIN _kroger_stores kroger
+        ON rpc_day.RETAILER_OUTLET_ID = kroger.RETAILER_OUTLET_ID
+    WHERE
+        mdp.brand_name ILIKE 'Finish'
+        AND rpc_day.DATE BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'
+        AND mdp.lob <> 'NTR'
+    GROUP BY
+        DATE_TRUNC('month', rpc_day.DATE)
+)
+SELECT * FROM _sales_today_yesterday
+UNION ALL
+SELECT * FROM _sales_2024;"
+Show the MTD gross sales of Mucinex in Walmart for the current month.,"SELECT 
+    ROUND(SUM(Gross_Sales), 2) AS Gross_Sales 
+FROM 
+    trinity_dev_domain_sales.smart_exec_us_gold.smex_cb_full_table_finance 
+WHERE 
+    Brand_Name ILIKE '%Mucinex%' 
+    AND Retailer_Name ILIKE '%WALMART%' 
+    AND Year_Month >= '2026-01-01' 
+    AND Year_Month <= '2026-01-03';
+"
+Sales for Mucinex for Kroger YTD,"WITH kroger_stores AS ( 
+    SELECT RETAILER_OUTLET_ID 
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet 
+    WHERE RETAILER_ID ILIKE '%KROGER%' 
+) 
+SELECT 
+    SUM(rpc.SALES_VALUE) AS TOTAL_SALES_VALUE 
+FROM 
+    trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc 
+JOIN 
+    trinity_prod_domain_master.master_data_gold.dimension_product prod 
+ON 
+    rpc.RECKITT_PRODUCT_CODE = prod.product_code 
+JOIN 
+    kroger_stores ks 
+ON 
+    rpc.RETAILER_OUTLET_ID = ks.RETAILER_OUTLET_ID 
+WHERE 
+    rpc.DATE BETWEEN '2026-01-01' AND '2025-12-31' 
+    AND prod.brand_name ILIKE '%Mucinex%' 
+    AND prod.lob <> 'NTR';"
+"What are the top 5 products that decreased the most for Finish at Kroger from Q4 2025 to Q3 2025, and what were the OOS% (TOOS%, COOS%, POOS%, LOOS%) for those top 5 products in both periods?","WITH kroger_stores AS (
+    SELECT RETAILER_OUTLET_ID
+    FROM trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet
+    WHERE RETAILER_ID ILIKE '%KROGER%'
+),
+finish_sales AS (
+    SELECT
+        prod.product_description,
+        prod.consumer_product_code AS SKU,
+        SUM(
+            CASE
+                WHEN rpc.DATE BETWEEN '2025-10-01' AND '2025-12-31'
+                    THEN rpc.SALES_VALUE
+                ELSE 0
+            END
+        ) AS q4_2025_sales,
+        SUM(
+            CASE
+                WHEN rpc.DATE BETWEEN '2025-07-01' AND '2025-09-30'
+                    THEN rpc.SALES_VALUE
+                ELSE 0
+            END
+        ) AS q3_2025_sales
+    FROM trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw rpc
+    JOIN trinity_prod_domain_master.master_data_gold.dimension_product prod
+        ON rpc.RECKITT_PRODUCT_CODE = prod.product_code
+    JOIN kroger_stores ks
+        ON rpc.RETAILER_OUTLET_ID = ks.RETAILER_OUTLET_ID
+    WHERE prod.brand_name ILIKE '%Finish%'
+    AND prod.lob <> 'NTR'
+    GROUP BY prod.product_description, prod.consumer_product_code
+),
+sales_trend AS (
+    SELECT
+        product_description,
+        SKU,
+        ROUND((q3_2025_sales - q4_2025_sales), 2) AS sales_decrease
+    FROM finish_sales
+),
+top_5_products AS (
+    SELECT
+        product_description,
+        SKU,
+        sales_decrease
+    FROM sales_trend
+    WHERE sales_decrease > 0
+    ORDER BY sales_decrease DESC
+    LIMIT 5
+),
+oos_data AS (
+    SELECT
+        prod.consumer_product_code AS SKU,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_complete_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q4_2025_coos,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_phantom_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q4_2025_poos,
+        ROUND((SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_complete_oos ELSE 0 END) + SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_phantom_oos ELSE 0 END)) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q4_2025_toos,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_low_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-10-01' AND '2025-12-31' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q4_2025_loos,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_complete_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q3_2025_coos,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_phantom_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q3_2025_poos,
+        ROUND((SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_complete_oos ELSE 0 END) + SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_phantom_oos ELSE 0 END)) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q3_2025_toos,
+        ROUND(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_low_oos ELSE 0 END) / NULLIF(SUM(CASE WHEN daily.DATE BETWEEN '2025-07-01' AND '2025-09-30' THEN daily.agg_sales ELSE 0 END), 0), 3) AS q3_2025_loos
+    FROM trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_daily_pvm_aj_v3 daily
+    JOIN trinity_prod_domain_master.master_data_gold.dimension_product prod
+        ON daily.RECKITT_PRODUCT_CODE = prod.product_code
+    JOIN kroger_stores ks
+        ON daily.RETAILER_OUTLET_ID = ks.RETAILER_OUTLET_ID
+    WHERE prod.brand_name ILIKE '%Finish%'
+    AND prod.lob <> 'NTR'
+    GROUP BY prod.consumer_product_code
+)
+SELECT
+    t5p.product_description,
+    t5p.SKU,
+    t5p.sales_decrease,
+    oos.q4_2025_coos,
+    oos.q4_2025_poos,
+    oos.q4_2025_toos,
+    oos.q4_2025_loos,
+    oos.q3_2025_coos,
+    oos.q3_2025_poos,
+    oos.q3_2025_toos,
+    oos.q3_2025_loos
+FROM top_5_products t5p
+JOIN oos_data oos
+    ON t5p.SKU = oos.SKU
+ORDER BY t5p.sales_decrease DESC;
+"
