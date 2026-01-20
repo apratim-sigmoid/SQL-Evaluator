@@ -2174,7 +2174,8 @@ with st.sidebar:
         api_key = st.text_input(
             "Azure OpenAI API Key",
             type="password",
-            value=st.session_state.azure_api_key,
+            value="" if st.session_state.use_quick_start else st.session_state.azure_api_key,
+            placeholder="Using default config" if st.session_state.use_quick_start else "",
             help="Enter your Azure OpenAI API key" + (" (loaded from secrets)" if st.session_state.use_quick_start else ""),
             disabled=st.session_state.use_quick_start
         )
@@ -2183,8 +2184,8 @@ with st.sidebar:
 
         azure_base_url = st.text_input(
             "Azure Endpoint (Base URL)",
-            value=st.session_state.azure_base_url,
-            placeholder="https://your-resource.openai.azure.com/",
+            value="" if st.session_state.use_quick_start else st.session_state.azure_base_url,
+            placeholder="Using default config" if st.session_state.use_quick_start else "https://your-resource.openai.azure.com/",
             help="Enter your Azure OpenAI endpoint URL" + (" (loaded from secrets)" if st.session_state.use_quick_start else ""),
             disabled=st.session_state.use_quick_start
         )
@@ -2193,8 +2194,8 @@ with st.sidebar:
 
         azure_api_version = st.text_input(
             "API Version",
-            value=st.session_state.azure_api_version,
-            placeholder="2024-02-01",
+            value="" if st.session_state.use_quick_start else st.session_state.azure_api_version,
+            placeholder="Using default config" if st.session_state.use_quick_start else "2024-02-01",
             help="Enter the Azure OpenAI API version" + (" (default: 2024-02-01)" if st.session_state.use_quick_start else ""),
             disabled=st.session_state.use_quick_start
         )
@@ -2230,18 +2231,23 @@ with st.sidebar:
 
     # Test API Connection
     if st.button("Test API Connection", use_container_width=True):
-        if api_key:
+        # Use session state values (which hold actual credentials even in quick start mode)
+        test_api_key = st.session_state.azure_api_key if api_provider == "Azure OpenAI" else st.session_state.openai_api_key
+        test_base_url = st.session_state.azure_base_url
+        test_api_version = st.session_state.azure_api_version
+
+        if test_api_key:
             try:
                 if api_provider == "Azure OpenAI":
-                    if not azure_base_url:
+                    if not test_base_url:
                         st.warning("Please enter Azure Base URL")
-                    elif not azure_api_version:
+                    elif not test_api_version:
                         st.warning("Please enter Azure API Version")
                     else:
                         client = AzureOpenAI(
-                            api_key=api_key,
-                            azure_endpoint=azure_base_url,
-                            api_version=azure_api_version
+                            api_key=test_api_key,
+                            azure_endpoint=test_base_url,
+                            api_version=test_api_version
                         )
                         response = client.chat.completions.create(
                             model=selected_model,
@@ -2250,7 +2256,7 @@ with st.sidebar:
                         )
                         st.success("✅ API Connection Successful!")
                 else:
-                    client = OpenAI(api_key=api_key)
+                    client = OpenAI(api_key=test_api_key)
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[{"role": "user", "content": "Say 'API Connected!' in 2 words"}],
