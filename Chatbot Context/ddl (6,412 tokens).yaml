@@ -1,0 +1,355 @@
+-   ddl: |-
+        -- CRITICAL EVALUATION RULE - DYNAMIC DATE HANDLING:
+        -- This chatbot receives 'today_date' variable DYNAMICALLY at runtime.
+        -- Date literals in SQL (e.g., '2025-12-01') are COMPUTED from today_date, NOT hardcoded.
+        -- DO NOT flag timeframe_mismatch, incorrect_to_date_logic, incorrect_date_boundaries,
+        -- or unparameterized_literals for dates derived from today_date or MAX(date).
+        -- The SQL is the FINAL OUTPUT after all date calculations from today_date.
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        -- CRITICAL EVALUATION RULE - DYNAMIC DATE HANDLING:
+        -- This chatbot receives 'today_date' variable DYNAMICALLY at runtime.
+        -- Date literals in SQL (e.g., '2025-12-01') are COMPUTED from today_date, NOT hardcoded.
+        -- DO NOT flag timeframe_mismatch, incorrect_to_date_logic, incorrect_date_boundaries,
+        -- or unparameterized_literals for dates derived from today_date or MAX(date).
+        -- The SQL is the FINAL OUTPUT after all date calculations from today_date.
+    sql_roles:
+    - admin_role
+    kpi_type: finance
+-   ddl: |-
+        -- CRITICAL EVALUATION RULE - DYNAMIC DATE HANDLING:
+        -- This chatbot receives 'today_date' variable DYNAMICALLY at runtime.
+        -- Date literals in SQL (e.g., '2025-12-01') are COMPUTED from today_date, NOT hardcoded.
+        -- DO NOT flag timeframe_mismatch, incorrect_to_date_logic, incorrect_date_boundaries,
+        -- or unparameterized_literals for dates derived from today_date or MAX(date).
+        -- The SQL is the FINAL OUTPUT after all date calculations from today_date.
+    sql_roles:
+    - admin_role
+    kpi_type: shipment
+-   ddl: |-
+        CREATE TABLE trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (
+            RETAILER_ID STRING COMMENT 'Retailer Name, use ilike for any filters based on this column. The list includes WALMART and KROGER.',
+            RETAILER_OUTLET_ID STRING COMMENT 'Unique identifier for the retailer outlet, always use this columns as is from this table',
+            RETAILER_OUTLET_DESCRIPTION STRING COMMENT 'Description of the retailer outlet, use ilike for any filters based on this column',
+            OUTLET_ZIP_CODE STRING COMMENT 'Postal code of the retailer outlet location',
+            OUTLET_SIZE STRING COMMENT 'Size category of the retailer outlet',
+            STATE_CODE STRING COMMENT 'State Code of the retailer outlet, use ilike for any filters based on this column. The list includes AK, IN, CA, CO, MO, TN, KY, IL, OH, KS, GA, SC, AL, MI, FL, NC, NV, WA, UT, AZ, TX, OR, ID, WV, MT, VA, WY, WI, LA, MS, AR, MD, NY, NE, DE, OK, NM, ND, IA, PA, DC, MN, ON, AB, BC, SD, NH, NJ, ME, PR, RI, CT, MA, HI, VT, QC, NB, NS, SK, NL, MB, NT',
+            CITY STRING COMMENT 'City, always use ilike for filtering this field',
+            REGION STRING COMMENT 'Region, use ilike for any filters based on this column. The list includes 42 - AR, MO, LA, 44 - Oklahoma, N TX, 6 - South Texas, 54 - Rocky Mountain, 41 - Indy / KY, 25 - Chicago / IL, 9 - S. Florida, 52 - MN IA, 3 - GA, FL, 53 - WISCONSIN, 40 - Missouri, 26 - North Carolina, 4 - South Carolina, 7 - W TX / N NM, 13 - LA, MS, 5 - Dallas, 20 - VA, OH, PA, WV, 2 - Atlanta GA, 14 - AL, FL, 11 - Memphis, 47 - Frontier, 12 - Nashville, 21 - OH/IN, 46 - Phoenix, 58 - S CA W AZ, 75 - VA, MD, 76 - West NY, PA, VA & DC, 19 - Michigan, OH, 57 - LA Vegas HI, 22 - PA, NJ, 56 - N CA N NV, 17 - NYC Metro, CT, RI, 16 - New England, 60 - OR WA AK, 29 - PUERTO RICO, 72 - SOUTHEAST, 61 - WEST, 59 - ATLANTIC COAST, 64 - SOUTHWEST, 55 - RETAIL REGION 55, 99 - RETAIL REGION 99',
+            DIVISION STRING COMMENT 'Division, use ilike for any filters based on this column and put values between % signs. The list includes 11 - Atl, 14 - Cincy, 16 - Columbus, 18 - Michigan, 21 - Central, 24 - Louisville, 25 - Delta, 26 - Nashville, 29 - MidAtlantic, 34 - Houston, 35 - Dallas, 531 - Roundys Illinois, 534 - Roundys Wisconsin, 540 - Kroger Fulfillment Network, 615 - Dillon, 620 - King Soopers, 660 - Frys, 701 - Fred Meyer, 703 - Ralphs, 704 - Food 4 Less, 705 - QFC, 706 - Smiths, 708 - Food 4 Less MW, 90 - Ruler Stores, A - SOUTHEAST BU, B - SOUTHWEST BU, M - WEST BU, E - NORTH BU, F - EAST BU, I - RETAIL SUBDIVISION I, O - NHM BU, Z - RETAIL SUBDIVISION Z, X - US Retail SD X',
+            MARKET STRING COMMENT 'Market description may contain embedded commas , use ilike for any filters based on this column',
+            OWNER_GROUP STRING COMMENT 'Owner Group',
+        )
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_prod_domain_sales.smart_exec_us_gold.kpi_prioritization_all_broker_tasks (
+            RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt internal product code (RPC)',
+            YEAR INT COMMENT 'Year',
+            WEEK_OF_YEAR INT COMMENT 'Week Of the Year',
+            WEEK_ID DATE COMMENT 'Week Id of the Year, always include in output if table was used',
+            RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet Id',
+            RETAILER STRING COMMENT 'Retailer Name, use ilike for any filters based on this column',
+            KPI_NAME STRING COMMENT 'Name of the KPI, which contains the following values: OUT_OF_STOCK, DISPLAY_PRE_SELL, HIGH_PRICING_COMPLIANCE, PROMO_PRICING_COMPLIANCE, DISPLAY_COMPLIANCE',
+            KPI_TYPE STRING COMMENT 'KPI Type, which includes only two types: TASKING and COMPLIANCE',
+            KPI_ACTION STRING COMMENT 'KPI Action',
+            KPI_TIME_NEEDED INT COMMENT 'KPI Time required to perform that action',
+            ADDITIONAL_TAG STRING COMMENT 'ADDITIONAL TAG',
+            BRAND_NAME STRING COMMENT 'Brand Name, use ilike for any filters based on this column',
+            PRODUCT_DESCRIPTION STRING COMMENT 'Description Of the Product',
+            DISPLAY_NAME STRING COMMENT 'Display Name, use ilike for any filters based on this column',
+            KPI_UNIQUE_ID STRING COMMENT 'KPI Unique Identifier',
+            RECOMMENDATION_ID STRING COMMENT 'Recommendation Id',
+            TASK_INFO STRING COMMENT 'Task Info',
+            CATEGORY_DESCRIPTION STRING COMMENT 'Category Description',
+            PRICE_LOW_RANGE DOUBLE COMMENT 'Price Low Range',
+            PRICE_HIGH_RANGE DOUBLE COMMENT 'Price High Range',
+            UPC STRING COMMENT 'Unique Product Code or Consumer product code',
+            USE_KPI_FOR_TASKING STRING COMMENT 'Use KPI For Tasking',
+            IMPACT_PER_MINUTE DOUBLE COMMENT 'Impact Per Minute',
+            ROW_CREATION_TIME TIMESTAMP COMMENT 'Time when Task was Generated, sort latest tasks by this column and always include in output if column was used to retrieve actions',
+            TODAY STRING COMMENT 'Today date',
+            TASK_RANK BIGINT COMMENT 'Task prioritization rank, meaning that 1st one, should be done first as the most important',
+            BROKER_UNIQUE_RECOMMENDATION_ID STRING COMMENT 'Broker Unique Recommendation ID',
+            RECOMMENDED_FLAG INT COMMENT 'Flag if task is recommended',
+            ACTIONED_FLAG STRING COMMENT 'Actioned Flag, using values 1 for Yes and null for No, should be used to retrieve the list of latest tasks / actions / activities / events',
+            ACTION_DATE DATE COMMENT 'Action Date by Broker, always include in output if table was used',
+            QUESTION STRING COMMENT 'Question',
+            RESPONSE STRING COMMENT 'Response',
+            GM_IMPACT STRING COMMENT 'GM Impact',
+            RELEVANT_FLAG INT 'Flag to indicate if the lead / task was relevant',
+            RESOLVED_FLAG INT 'Flag to indicate if the lead / task has been resolved',
+            SCOPE_FLAG STRING 'Flag to denote if the lead is within the scope of the pilot',
+            IS_DISPLAY_COMPLIANT DOUBLE COMMENT 'Display Compliance Value 0/0.5/1',
+            ACTION_TAKEN BOOLEAN COMMENT 'Action Taken',
+            ACTION_DESCRIPTION STRING COMMENT 'Action Description'
+        )
+        COMMENT 'The table contains task recommended to brokers for further action.  Always include columns PRODUCT_DESCRIPTION, BRAND_NAME, DISPLAY_NAME when returning KPI task results from table';
+
+        ALTER TABLE trinity_prod_domain_sales.smart_exec_us_gold.kpi_prioritization_all_broker_tasks
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_prod_domain_sales.smart_exec_us_gold.kpi_prioritization_all_broker_tasks
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw (
+          RETAILER_NAME STRING COMMENT 'Retailer Name, use ilike for any filters based on this column',
+          RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet ID',
+          RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt internal product code (RPC). Always do LEFT JOIN with dimension_product table and filter out records using "WHERE lob <> "NTR"',
+          DATE DATE COMMENT 'Sales Date for the product in the outlet, always include in output if table was used',
+          SALES_VOLUME DOUBLE COMMENT 'Sales in units for the product in the outlet',
+          SALES_VALUE DOUBLE COMMENT 'Sales in $ for the product in the outlet',
+          ON_HAND_QTY DOUBLE COMMENT 'Inventory for the product in the outlet',
+          AVG_SALES_VOLUME DOUBLE COMMENT 'Average Sales Volume of the product',
+          PREDICTED_SALES DOUBLE COMMENT 'Predicted Sales for the product in the outlet',
+          NUM_FACINGS BIGINT COMMENT 'Total number of facings for this RPC in the outlet',
+          TOTAL_OOS_OUTLETS_COV_PCT DOUBLE COMMENT 'Total OOS Network Coverage Percent',
+          ENG_IN_TRANSIT_QUANTITY DOUBLE COMMENT 'Store In Transit Quantity',
+        COMMENT 'The fact_rpc_outlet_daily table contains daily sales data for products in different retail outlets. It includes information such as the retailer name, retailer outlet ID, Reckitt product code, sales date, sales volume, sales value, inventory quantity, average sales volume, predicted sales, and various indicators related to out-of-stock (OOS) situations. The table also provides details on the number of facings for each product in the outlet, the total OOS network coverage percentage, and the quantity of products in transit to the store. This data is valuable for analyzing sales performance, inventory management, and identifying OOS issues in the retail network.'
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_daily_excl_ntr_vw
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_prod_domain_master.master_data_gold.dimension_product (
+          product_code STRING COMMENT 'Reckitt internal product code (RPC)',
+          product_description STRING COMMENT 'Description of the product, use ilike for any filters based on this column',
+          lob STRING COMMENT 'Line of business, use ilike for any filters based on this column',
+          lob_description STRING COMMENT 'Description of the line of business, use ilike for any filters based on this column',
+          segment_description STRING COMMENT 'Description of the segment, use ilike for any filters based on this column',
+          segment_group_description STRING COMMENT 'Description of the segment group, use ilike for any filters based on this column',
+          sub_segment_group_description STRING COMMENT 'Description of the sub-segment group, use ilike for any filters based on this column',
+          category_description STRING COMMENT 'Description of the category, use ilike for any filters based on this column',
+          sub_category_description STRING COMMENT 'Description of the sub-category, use ilike for any filters based on this column',
+          brand_name STRING COMMENT 'Name of the brand, use ilike for any filters based on this column. Brands list includes: Lysol/Lizol, d-Con, K-Y, Mucinex, Finish, Airwick, MegaRed, Spray N Wash, Move Free, Woolite, Botanica, Easy Off, Neuriva, Digestive Advantage, Biofreeze, Queen V, Airborne, Rid-X, Veet, Schiff, Durex, Therapearl, Resolve (Fabric/Carpet), Clearasil, Amope, Lime-A-Way, Frenchs, Lime Way, Cepacol, Lanacane, Easy On, Delsym, BodiOme, Old English, Vanish, Brasso, Franks RedHot, Glass Plus, Scalpicin, Mop and Glo, Big Boy, Private Label, Lice MD, Calgon, No Salt, Noxon, Unknown, Own Label, Cleen-O-Pine, Vivid, Cattlemens, Tigers Milk',
+          consumer_product_code STRING COMMENT 'Consumer product code or UPC (union product code) code. The column contains integers in string format. Use equality with string (of integers) to look for codes, like consumer_product_code = ''<some_UPC_code>>''.
+        )
+        COMMENT 'The product_hierarchy table contains detailed information about products, including their codes, descriptions, line of business. This data is essential for managing product information and understanding the product structure within the organization.
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_prod_domain_sales.smart_exec_us_silver.broker_feedback (
+            BROKER STRING  COMMENT 'Broker Name, use ilike for any filters based on this column',
+            BROKER_UNIQUE_RECOMMENDATION_ID BIGINT  COMMENT 'Unique Recommendation ID for the broker task',
+            RETAILER_OUTLET_ID STRING  COMMENT 'Retailer Outlet ID',
+            RECKITT_PRODUCT_CODE STRING  COMMENT 'Reckitt internal product code (RPC)',
+            BROKER_OUTLET_CODE STRING  COMMENT 'Outlet code or outlet number from the broker's perspective',
+            BROKER_PRODUCT_CODE BIGINT  COMMENT 'UPC number from broker's perspective',
+            KPI_TYPE STRING  COMMENT 'Type of Key Performance Indicator (KPI) or issue to be addressed, includes types like Display Compliance, OOS and POG Compliance',
+            VISIT_DATE STRING  COMMENT 'Date of broker visit, which stored as string in the format like yyyy-mm-dd, always include in output if table was used',
+            ALERT_DATE STRING DATE  COMMENT 'Date that the Alert was generated',
+            DATA_OBSERVATION_DATE DATE  COMMENT 'Date of the last observed data when the Alert was generated',
+            RELEVANT_FLAG INT  COMMENT 'Flag to show if the alert was relevant',
+            RESOLVED_FLAG INT  COMMENT 'Flag to show if the root case of the alert has been resolved',
+            NOT_ANSWERED_FLAG INT  COMMENT 'Flag to show if the brokers have not answered the alert',
+            IMAGE_1 STRING  COMMENT 'URI for the first image file of posted by the broker',
+            IMAGE_1 STRING  COMMENT 'URI for the second image file of posted by the broker',
+            QUESTIONS_RESPONSE_OBJ STRING  COMMENT 'Field, which contains the discussion between broker and retailer (store manager), also known as a broker feedback',
+            IS_DISPLAY_COMPLIANT DOUBLE  COMMENT 'Value to show the broker feedback regarding if a display is compliant. A value oif 1 is fully compliance, a value of 0.5 is partially complaint',
+            ACTION_TAKEN  BOOLEAN  COMMENT 'Flag to indicate if an action was taken following the broker checking the alert',
+            ACTION_DESCRIPTION STRING  COMMENT 'Description of the broker action taken',
+            DISPLAY_NAME STRING  COMMENT 'Display name of the product',
+        )
+        COMMENT 'The broker_feedback table contains data on the interactions between brokers and retailers from broker visits and audits, including unique recommendation IDs, store and UPC numbers, KPI types, visit and alert dates and questions response objects. This data is useful for analyzing broker and retailer performance and identifying areas for improvement in sales and marketing strategies.';
+
+        ALTER TABLE trinity_prod_domain_sales.smart_exec_us_silver.broker_feedback
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_prod_domain_sales.smart_exec_us_silver.broker_feedback
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+        
+        ALTER TABLE trinity_prod_domain_sales.smart_exec_us_silver.broker_feedback
+                ADD CONSTRAINT BROKER_UNIQUE_RECOMMENDATION_ID
+                FOREIGN KEY (BROKER_UNIQUE_RECOMMENDATION_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.kpi_prioritization_all_broker_tasks (BROKER_UNIQUE_RECOMMENDATION_ID);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_week_excl_ntr_vw (
+            RETAILER_NAME STRING COMMENT 'Retailer Name, use ilike for any filters based on this column',
+            RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet ID',
+            RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt internal product code (RPC). Always do LEFT JOIN with dimension_product table and filter out records using "WHERE lob <> "NTR"',
+            WEEK_ID DATE COMMENT 'Sales Week for the product in the outlet (Week Starting Sunday), always include in output if table was used',
+            DISPLAY_FLAG INT 'Flag to identify if the product is oon display',
+            IS_DISPLAY_COMPLIANT DOUBLE 'Flag to identify if the product is display complianc',
+            PREDICTED_SALES DOUBLE 'Sales Predicted by the Model for particular WEEK and RPC',
+            IS_PROMO_COMPLIANT INT 'Flag to identify if the product is a promo compliant',
+            IS_PRICE_ADHERENT INT 'Flag to identify if the product is a price adherent',
+            ACTIVITY_NAME STRING 'Name of the activity/display in the Outlet',
+            MODEL_DISPLAY_COMPLIANCE DOUBLE 'Display Compliance Value Coming from the Model for the Product in the Outlet',
+            POTENTIAL_DLR_OPPORTUNITY DOUBLE 'Potential Dollar Opportunity for a particular Week Outlet and Product Combo',
+            NUM_FACINGS BIGINT COMMENT 'Total number of facings for this SKU in the outlet that the store should have',
+        )
+        COMMENT 'The table contains weekly number of facings for products across various retail outlets.';
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_week_excl_ntr_vw
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_rpc_outlet_week_excl_ntr_vw
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_display_compliance_selection (
+        RETAILER_NAME STRING COMMENT 'Retailer Name, use ilike for any filters based on this column'
+        BRAND_NAME STRING COMMENT 'Brand Name, use ilike for any filters based on this column'
+        RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt Product Code'
+        PROMO_NAME STRING COMMENT 'Promotion Name, also called Activity name in other tables, use ilike for any filters based on this column'
+        PROMO_STATUS STRING COMMENT 'Promo Status'
+        PROMO_START_DT TIMESTAMP COMMENT 'Start date of this display or promotion activity in stores'
+        PROMO_END_DT TIMESTAMP COMMENT 'End Date of this display or promotion activity in stores'
+        OBJECTIVE STRING COMMENT 'Objective'
+        PROMO_TYPE STRING COMMENT 'Promo Type'
+        TACTIC STRING COMMENT 'Tactic'
+        MECHANINC_1 STRING COMMENT 'Mechaninc 1'
+        DISPLAY_FLAG INT COMMENT 'Display Flag'
+        PROMO_FLAG INT COMMENT 'Promo Flag'
+        TOTAL_ELIGIBLE_OUTLETS DECIMAL(21,0) COMMENT 'Numer of Eligible Outlets for the promotion'
+        RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet Id'
+        OUTLET_RANK INT COMMENT 'Outlet Rank'
+        SOURCE STRING COMMENT 'Source'
+        promo_name_URL STRING COMMENT 'this URL will return the sell sheet for the promo'
+        )
+        COMMENT 'This table contains details of promotions. It includes the products that are part of promotions or other displays in retail outlets by retailers, including retailer name, RETAILER_OUTLET_ID, business unit, activity name and type, and valid date range. It also includes the product ID and brand details for the retailers, as well as the number of stores involved. This data is useful for analyzing the effectiveness of product displays and promotions across different retailers and business units.';
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_display_compliance_selection
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.fact_display_compliance_selection
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_daily_aj_v3 (
+          RETAILER_NAME STRING COMMENT 'Retailer Name, use ilike for any filters based on this column',
+          RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet ID',
+          RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt internal product code (RPC). Always do LEFT JOIN with dimension_product table and filter out records using "WHERE lob <> "NTR"',
+          DATE DATE COMMENT 'Sales Date for the product in the outlet, always include in output if table was used',
+          agg_sales FLOAT COMMENT 'sales to be used only for calculating OOS% denominator',
+          agg_phantom_oos FLOAT COMMENT 'Phantom Out of Stock',
+          agg_complete_oos FLOAT COMMENT 'Complete Out of Stock',
+          agg_low_oos FLOAT COMMENT 'Low Out of Stock'
+        )
+        COMMENT 'The tmp_fact_rpc_outlet_daily_aj_v3 table contains daily sales data for products in different retail outlets. It includes information such as the retailer name, retailer outlet ID, Reckitt product code, sales date, and various indicators related to out-of-stock (OOS) situations.This table is useful  for analyzing and identifying OOS issues in the retail network.'
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_daily_aj_v3
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_daily_aj_v3
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_week_aj_v3 (
+            RETAILER_NAME STRING COMMENT 'Retailer Name, use ilike for any filters based on this column',
+            RETAILER_OUTLET_ID STRING COMMENT 'Retailer Outlet ID',
+            RECKITT_PRODUCT_CODE STRING COMMENT 'Reckitt internal product code (RPC). Always do LEFT JOIN with dimension_product table and filter out records using "WHERE lob <> "NTR"',
+            WEEK_ID DATE COMMENT 'Sales Week for the product in the outlet (Week Starting Sunday), always include in output if table was used',
+            ACTIVITY_NAME STRING 'Name of the activity/display in the Outlet',
+            agg_total_compliance_hybrid FLOAT COMMENT 'Display compliance',
+            agg_sales_dp_hybrid FLOAT COMMENT 'sales value',
+            agg_actual_compliance FLOAT COMMENT 'aggregate actual compliance'
+        )
+        COMMENT 'The table is useful in calculating display complaince';
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_week_aj_v3
+        ADD CONSTRAINT RETAILER_OUTLET_ID
+        FOREIGN KEY (RETAILER_OUTLET_ID ) REFERENCES trinity_prod_domain_sales.smart_exec_us_gold.dim_outlet (RETAILER_OUTLET_ID);
+
+        ALTER TABLE trinity_dev_domain_sales.smart_exec_us_gold.tmp_fact_rpc_outlet_week_aj_v3
+        ADD CONSTRAINT RECKITT_PRODUCT_CODE
+        FOREIGN KEY (RECKITT_PRODUCT_CODE ) REFERENCES trinity_prod_domain_master.master_data_gold.dimension_product (product_code);
+    sql_roles:
+    - admin_role
+    kpi_type: sales_execution
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.smex_cb_full_table_finance (
+            YEAR_MONTH DATE COMMENT 'Year and Month of the sales data present in date format - yyyy-mm-dd',
+            BRAND_CODE STRING COMMENT 'Brand code identifier',
+            BRAND_NAME STRING COMMENT 'Name of the brand, use ilike for any filters based on this column',
+            Product_Description STRING COMMENT 'Name of the products, use ilike for any filters based on this column',
+            SEGMENT_CODE STRING COMMENT 'Segment code identifier',
+            SEGMENT_DESCRIPTION STRING COMMENT 'Description of the segment, use ilike for any filters based on this column',
+            Mra_CODE STRING COMMENT 'MRA (Market Reporting Area) code identifier',
+            SCENARIO STRING COMMENT 'Scenario type, typically contains values like ACT for Actual',
+            LEVEL_2_NAME STRING COMMENT 'Level 2 hierarchy name from customer hierarchy',
+            LEVEL_4_NAME STRING COMMENT 'Level 4 hierarchy name from customer hierarchy',
+            AUDIT_ID STRING COMMENT 'Audit identifier for tracking data lineage',
+            FPI_CODE STRING COMMENT 'FPI (Financial Planning Item) code, typically GMIND for gross margin indirect', TSP for trade spend/investment, PL3110000T for net revenue' and PL3111100T for gross sales,
+            RETAILER_NAME STRING COMMENT 'Retailer name derived from hierarchy levels, use ilike for any filters based on this column',
+            Gross_Sales STRING COMMENT 'Gross Sales',
+            Net_Revenue STRING COMMENT 'Net Revenue',
+            Trade_Investment STRING COMMENT 'Trade Investment',
+            Gross_Margin STRING COMMENT 'Gross Margin'
+        )
+        COMMENT 'The smex_cb_full_table_finance table contains gross margin, gross sales, net revenue and trade investment data by customer aggregated across multiple company codes (US0200, US42, US43, US49, US19, GB20, MX07) by brand, segment, and customer hierarchy. It includes financial data from fusion finance GL system with currency conversions applied for MX (Mexican Peso to USD at 18.3350) and GB (British Pound to USD at 1.2781). The data is filtered for ACT (Actual) scenario, excludes specific MRA codes and brand codes (AMO, SCO) based on company code, and focuses Finance values like gross margin, gross sales, net revenue and trade investment. This view is useful for analyzing gross margin performance across different brands, segments, retail customers, and company codes to understand profitability by customer.';
+    sql_roles:
+    - admin_role
+    kpi_type: finance
+-   ddl: |-
+        CREATE TABLE trinity_dev_domain_sales.smart_exec_us_gold.shipment_report (
+            DATE DATE COMMENT 'Year Month and Date of the sales data present in date format - yyyy-mm-dd',
+            BRAND_NAME STRING COMMENT 'Name of the brand, use ilike for any filters based on this column',
+            Product STRING COMMENT 'Name of the products, use ilike for any filters based on this column',
+            SEGMENT STRING COMMENT 'Description of the segment, use ilike for any filters based on this column',
+            RETAILER STRING COMMENT 'Description of the retailer, use ilike for any filters based on this column',
+            Open_previous_month STRING COMMENT 'Open previous month',
+            Credit_Debit_GS_value STRING COMMENT 'Credit Debit GS Value',
+            Total_open STRING COMMENT 'total open',
+            Op_Sh_Inv STRING COMMENT 'Open + Shipped + Invoiced',
+            Open_on_hold STRING COMMENT 'Open on hold',
+            Open STRING COMMENT 'Open',
+            Unplanned STRING COMMENT 'Unplanned',
+            Planned STRING COMMENT 'Planned',
+            Confirmed STRING COMMENT 'Confirmed',
+            Picked STRING COMMENT 'Picked',
+            Shipped STRING COMMENT 'Shipped',
+            Invoiced STRING COMMENT 'Invoiced'
+            Shipped_not_invoiced STRING COMMENT 'Shipped not invoiced',
+            Total_without_PF STRING COMMENT 'Total without or w/o PF',
+            Open_no_product STRING COMMENT 'Open no product'
+        )
+        COMMENT 'The shipment report table contains shipment data by customer by brand, segment, and customer hierarchy.';
+    sql_roles:
+    - admin_role
+    kpi_type: shipment
+-   ddl: |-
+        CREATE TABLE trinity_prod_domain_sales.smart_exec_us_gold.LV_sales_processed (
+            DATE DATE COMMENT 'Year Month and Date of the sales data present in date format - yyyy-mm-dd',
+            BRAND_NAME STRING COMMENT 'Name of the brand, use ilike for any filters based on this column',
+            Product STRING COMMENT 'Name of the products, use ilike for any filters based on this column',
+            SEGMENT STRING COMMENT 'Description of the segment, use ilike for any filters based on this column',
+            RETAILER STRING COMMENT 'Description of the retailer, use ilike for any filters based on this column',
+            LV_sales_call STRING COMMENT 'LV sales call'      
+        )
+        COMMENT 'The LV sales data table contains LV_sales_call data by customer by brand, segment, and customer hierarchy.';
+    sql_roles:
+    - admin_role
+    kpi_type: shipment
